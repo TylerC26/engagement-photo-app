@@ -7,19 +7,21 @@ function App() {
   const [isUploading, setIsUploading] = useState(false);
 
   const S3_BUCKET_URL = "https://engagement-party-photo.s3.amazonaws.com/";
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL; // Make sure this is set in your .env file
 
   // Fetch uploaded photos (list from S3 bucket)
   useEffect(() => {
     async function fetchPhotos() {
       try {
-        const response = await axios.get("http://localhost:3001/photos");
+        // Use API_BASE_URL for fetching photos
+        const response = await axios.get(`${API_BASE_URL}/photos`);
         setPhotos(response.data);
       } catch (error) {
         console.error("Error fetching photos:", error);
       }
     }
     fetchPhotos();
-  }, []);
+  }, [API_BASE_URL]);
 
   // Handle file selection
   const handleFileChange = (event) => {
@@ -36,9 +38,9 @@ function App() {
     setIsUploading(true);
 
     try {
-      // Get signed URL from backend
+      // Get signed URL from backend using API_BASE_URL
       const response = await axios.post(
-        "https://YOUR_BACKEND_API/upload-url",
+        `${API_BASE_URL}/upload-url`, // Updated to use API_BASE_URL
         {
           filename: selectedFile.name,
           filetype: selectedFile.type,
