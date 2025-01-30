@@ -7,7 +7,7 @@ function App() {
   const [isUploading, setIsUploading] = useState(false);
 
   const S3_BUCKET_URL = "https://engagement-party-photo.s3.amazonaws.com/";
-  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL; // Make sure this is set in your .env file
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL; // Dynamically set via Amplify
 
   // Fetch uploaded photos (list from S3 bucket)
   useEffect(() => {
@@ -40,7 +40,7 @@ function App() {
     try {
       // Get signed URL from backend using API_BASE_URL
       const response = await axios.post(
-        `${API_BASE_URL}/upload-url`, // Updated to use API_BASE_URL
+        `${API_BASE_URL}/upload-url`, // Dynamically use API_BASE_URL
         {
           filename: selectedFile.name,
           filetype: selectedFile.type,
@@ -60,8 +60,20 @@ function App() {
       setPhotos((prevPhotos) => [...prevPhotos, fileUrl]);
       alert("Photo uploaded successfully!");
     } catch (error) {
+      // Log the error for debugging
       console.error("Error uploading photo:", error);
-      alert("Failed to upload photo. Please try again.");
+
+      // Show the error message in an alert
+      if (error.response) {
+        // Server responded with a status other than 2xx
+        alert(`Upload failed: ${error.response.data.message || error.response.data || "Server error"}`);
+      } else if (error.request) {
+        // Request was made but no response was received
+        alert("Upload failed: No response received from the server.");
+      } else {
+        // Something else happened
+        alert(`Upload failed: ${error.message}`);
+      }
     }
 
     setIsUploading(false);

@@ -39,8 +39,8 @@ app.get("/photos", async (req, res) => {
   }
 });
 
-// Start the server
+// Start the server (bind to 0.0.0.0 for external access)
 const PORT = 3001;
-app.listen(PORT, () => {
-  console.log(`Backend server is running on http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Backend server is running on http://0.0.0.0:${PORT}`);
 });
