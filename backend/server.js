@@ -43,6 +43,7 @@ app.get("/photos", async (req, res) => {
 
 // Start the server (bind to 0.0.0.0 for external access)
 const PORT = 3001;
+// hcange
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Backend server is running on http://0.0.0.0:${PORT}`);
 });
