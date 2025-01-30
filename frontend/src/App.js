@@ -3,7 +3,7 @@ import axios from "axios";
 
 function App() {
   const [photos, setPhotos] = useState([]);
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
 
   const S3_BUCKET_URL = "https://engagement-party-photo.s3.amazonaws.com/";
@@ -25,59 +25,57 @@ function App() {
 
   // Handle file selection
   const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
+    setSelectedFiles([...event.target.files]);
   };
 
-  // Upload the selected file to S3
+  // Upload the selected files to S3
   const handleUpload = async () => {
-    if (!selectedFile) {
-      alert("Please select a photo to upload!");
+    if (selectedFiles.length === 0) {
+      alert("Please select photos to upload!");
       return;
     }
 
     setIsUploading(true);
 
     try {
-      // Get signed URL from backend using API_BASE_URL
-      const response = await axios.post(
-        `${API_BASE_URL}/upload-url`, // Dynamically use API_BASE_URL
-        {
-          filename: selectedFile.name,
-          filetype: selectedFile.type,
-        }
-      );
+      const uploadedPhotos = [];
 
-      const { uploadUrl, fileUrl } = response.data;
+      for (const file of selectedFiles) {
+        // Get signed URL from backend using API_BASE_URL
+        const response = await axios.post(`${API_BASE_URL}/upload-url`, {
+          filename: file.name,
+          filetype: file.type,
+        });
 
-      // Upload file to S3
-      await axios.put(uploadUrl, selectedFile, {
-        headers: {
-          "Content-Type": selectedFile.type,
-        },
-      });
+        const { uploadUrl, fileUrl } = response.data;
+
+        // Upload file to S3
+        await axios.put(uploadUrl, file, {
+          headers: {
+            "Content-Type": file.type,
+          },
+        });
+
+        uploadedPhotos.push(fileUrl);
+      }
 
       // Update photo gallery
-      setPhotos((prevPhotos) => [...prevPhotos, fileUrl]);
-      alert("Photo uploaded successfully!");
+      setPhotos((prevPhotos) => [...prevPhotos, ...uploadedPhotos]);
+      alert("Photos uploaded successfully!");
     } catch (error) {
-      // Log the error for debugging
-      console.error("Error uploading photo:", error);
+      console.error("Error uploading photos:", error);
 
-      // Show the error message in an alert
       if (error.response) {
-        // Server responded with a status other than 2xx
         alert(`Upload failed: ${error.response.data.message || error.response.data || "Server error"}`);
       } else if (error.request) {
-        // Request was made but no response was received
         alert("Upload failed: No response received from the server.");
       } else {
-        // Something else happened
         alert(`Upload failed: ${error.message}`);
       }
     }
 
     setIsUploading(false);
-    setSelectedFile(null);
+    setSelectedFiles([]);
   };
 
   return (
@@ -91,6 +89,7 @@ function App() {
           type="file"
           accept="image/*"
           onChange={handleFileChange}
+          multiple
           className="block w-full border p-2 mb-2 rounded"
         />
         <button
@@ -100,7 +99,7 @@ function App() {
             isUploading ? "opacity-50 cursor-not-allowed" : ""
           }`}
         >
-          {isUploading ? "Uploading..." : "Upload Photo"}
+          {isUploading ? "Uploading..." : "Upload Photos"}
         </button>
       </div>
 
