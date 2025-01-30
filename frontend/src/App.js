@@ -6,13 +6,13 @@ function App() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  const S3_BUCKET_URL = "https://YOUR_BUCKET_NAME.s3.amazonaws.com/";
+  const S3_BUCKET_URL = "https://engagement-party-photo.s3.amazonaws.com/";
 
   // Fetch uploaded photos (list from S3 bucket)
   useEffect(() => {
     async function fetchPhotos() {
       try {
-        const response = await axios.get("https://YOUR_BACKEND_API/photos");
+        const response = await axios.get("http://localhost:3001/photos");
         setPhotos(response.data);
       } catch (error) {
         console.error("Error fetching photos:", error);
