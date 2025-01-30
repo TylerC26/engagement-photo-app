@@ -79,3 +79,4 @@ app.get("/photos", async (req, res) => {
 const PORT = 3001;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Backend server is running on http://0.0.0.0:${PORT}`);
+});
